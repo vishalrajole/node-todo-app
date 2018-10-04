@@ -37,8 +37,8 @@ describe("POST /todos", () => {
         }
         Todo.find()
           .then(todos => {
-            expect(todos.length).toBe(1);
-            expect(todos[0].text).toBe(text);
+            expect(todos.length).toBe(3);
+            expect(todos[2].text).toBe(text);
             done();
           })
           .catch(error => done(error));
@@ -97,6 +97,18 @@ describe("GET /todos/:id", () => {
     request(app)
       .get("/todos/abcd")
       .expect(404)
+      .end(done);
+  });
+});
+describe("DELETE /todos/:id", () => {
+  var id = "";
+  it("should remove document", done => {
+    request(app)
+      .delete(`/todos/${todos[0]._id.toHexString()}`)
+      .expect(200)
+      .expect(res => {
+        expect(res.body.todo.text).toBe(todos[0].text);
+      })
       .end(done);
   });
 });

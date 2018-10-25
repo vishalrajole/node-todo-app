@@ -4,25 +4,11 @@ const { ObjectID } = require("mongodb");
 const { app } = require("./../server");
 const { Todo } = require("./../models/todo");
 
-const todos = [
-  {
-    _id: new ObjectID(),
-    text: "first todo test"
-  },
-  {
-    _id: new ObjectID(),
-    text: "second todo test",
-    completed: true,
-    completedAt: 342342
-  }
-];
-beforeEach(done => {
-  Todo.remove({})
-    .then(() => {
-      return Todo.insertMany(todos);
-    })
-    .then(() => done());
-});
+const { todos, populateTodos, users, populateUsers } = require("./seed/seed");
+
+beforeEach(populateTodos);
+beforeEach(populateTodos);
+
 describe("POST /todos", () => {
   it("should create a new todo", done => {
     var text = "Test todo post test";
@@ -174,6 +160,29 @@ describe("PATCH /todos/:id", () => {
         expect(res.body.todo.text).toBe(text);
         expect(res.body.todo.completed).toBe(false);
         expect(res.body.todo.completedAt).toNotExist();
+      })
+      .end(done);
+  });
+});
+
+describe("GET /users/me", () => {
+  it("should return user if authenticated", done => {
+    request(app)
+      .get("/users/me")
+      .set("x-auth", users[0].tokens[0].token)
+      .expect(200)
+      .expect(res => {
+        expect(res.body._id).toBeA(users[0]._id.toHexString());
+        expect(res.body.email).toBeA(users[0].email);
+      })
+      .end(done);
+  });
+  it("should return 401 user if not authenticated", done => {
+    request(app)
+      .get("/users/me")
+      .expect(401)
+      .expect(res => {
+        expect(res.body).toEqual({});
       })
       .end(done);
   });

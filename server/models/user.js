@@ -45,7 +45,7 @@ UserSchema.methods.generateAuthToken = function() {
   var user = this;
   var access = "auth";
   var token = jwt
-    .sign({ _id: user._id.toHexString(), access }, "letmein123")
+    .sign({ _id: user._id.toHexString(), access }, process.env.JWT_SECRET)
     .toString();
   user.tokens.push({ access, token });
   return user.save().then(() => {
@@ -66,7 +66,7 @@ UserSchema.statics.findByeToken = function(token) {
   var User = this;
   var decodedToken;
   try {
-    decodedToken = jwt.verify(token, "letmein123");
+    decodedToken = jwt.verify(token, process.env.JWT_SECRET);
   } catch (error) {
     return Promise.reject();
   }
